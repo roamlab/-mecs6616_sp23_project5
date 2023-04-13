@@ -2,12 +2,36 @@ import gym
 from gym import spaces
 from gym.utils import seeding
 import numpy as np
+import time
+from render import Renderer
 from geometry import polar2cartesian
+from robot import Robot
+from arm_dynamics import ArmDynamics
 
 
 class ArmEnv(gym.Env):
-    def __init__(self, arm):
-        self.arm = arm  # DONOT modify
+    def __init__(self, gui=False):
+
+        num_links=2
+        link_mass=0.1
+        link_length=1
+        friction=0.1
+        self.timestep=0.01
+
+        self.num_links = num_links
+        self.arm = Robot(
+            ArmDynamics(
+                num_links=num_links,
+                link_mass=link_mass,
+                link_length=link_length,
+                joint_viscous_friction=friction,
+                dt=self.timestep,
+                gravity=False
+            )
+        )
+        self.arm.reset()
+
+
         self.goal = None  # Use for computing observation
         self.observation_space = None  # You will need to set this appropriately
         self.action_space = None  # You will need to set this appropriately
@@ -20,6 +44,10 @@ class ArmEnv(gym.Env):
         self.observation_space = spaces.Box(-np.inf, np.inf, shape=(2 * self.num_links + 4,))
         self.action_space = spaces.Box(-1, 1, shape=(self.num_links,))
         self.num_steps = 0
+        self.gui = gui
+        if self.gui:
+            self.renderer = Renderer()
+            time.sleep(1)      
 
     # We will be calling this function to set the goal for your arm during testing.
     def set_goal(self, goal):
@@ -33,10 +61,14 @@ class ArmEnv(gym.Env):
         self.arm.set_action(action)
         for _ in range(int(self.step_duration / self.timestep)):
             self.arm.advance()
+        
+        if self.gui:
+            self.renderer.plot([(self.arm, "tab:blue")])
 
         new_state = self.arm.get_state()
         # Compute reward
         pos_ee = self.arm.dynamics.compute_fk(new_state)
+        vel_ee = self.arm.dynamics.compute_vel_ee(new_state)
         dist = np.linalg.norm(pos_ee - self.goal)
         reward = -dist ** 2
 
@@ -47,7 +79,7 @@ class ArmEnv(gym.Env):
             done = True
 
         # required for terminal logging, mention this in project description
-        info = dict(reward=reward, done=done)
+        info = dict(reward=reward, done=done, pos_ee=pos_ee, vel_ee=vel_ee)
 
         return obs, reward, done, info
 
@@ -65,8 +97,8 @@ class ArmEnv(gym.Env):
         radius = (radius_max - radius_min) * self.np_random.random_sample() + radius_min
         angle = (angle_max - angle_min) * self.np_random.random_sample() + angle_min
         angle -= np.pi / 2
-        goal = polar2cartesian(radius, angle)
-        self.set_goal(goal)
+        setgoal = polar2cartesian(radius, angle) if goal is None else np.array(goal)
+        self.set_goal(setgoal)
 
         return self.get_obs()
 
