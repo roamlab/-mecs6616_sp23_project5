@@ -10,27 +10,9 @@ from arm_dynamics import ArmDynamics
 
 
 class ArmEnv(gym.Env):
-    def __init__(self, gui=False):
+    def __init__(self, arm, gui=False):
 
-        num_links=2
-        link_mass=0.1
-        link_length=1
-        friction=0.1
-        self.timestep=0.01
-
-        self.num_links = num_links
-        self.arm = Robot(
-            ArmDynamics(
-                num_links=num_links,
-                link_mass=link_mass,
-                link_length=link_length,
-                joint_viscous_friction=friction,
-                dt=self.timestep,
-                gravity=False
-            )
-        )
-        self.arm.reset()
-
+        self.arm = arm
 
         self.goal = None  # Use for computing observation
         self.observation_space = None  # You will need to set this appropriately
