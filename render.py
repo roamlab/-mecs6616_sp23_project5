@@ -70,9 +70,6 @@ class Renderer(object):
 			robot_length += link_lengths[i]
 		plt.ylim(- 1.1 * robot_length, 1.1 * robot_length)
 		plt.xlim(- 1.1 * robot_length, 1.1 * robot_length)
-		# Add goal marker to plot
-		goal = robot.goal.reshape(-1)
-		plt.plot(goal[0], goal[1], 'x', color=color)
 
 		for i in range(0, num_links):
 			R = np.dot(R, rot(q[i]))
@@ -82,3 +79,11 @@ class Renderer(object):
 			self._ax1.add_line(mlines.Line2D(
 				(off_x + p[0], off_x + p_next[0]), (off_y + p[1], off_y + p_next[1]), color=color))
 			p = p_next
+		
+		if robot.goal is not None:
+			goal = robot.goal.reshape(-1)
+			pos_ee = robot.dynamics.compute_fk(state)
+			dist = np.linalg.norm(pos_ee - robot.goal)
+			s = "Goal distance: {:.2f} \n".format(dist)
+			plt.text(x=-robot_length, y=-robot_length, ha='left', va='top', s=s)
+			self._ax1.plot(robot.goal[0], robot.goal[1], 'x', color=color)
