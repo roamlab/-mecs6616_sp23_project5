@@ -3,7 +3,7 @@ import time
 from geometry import polar2cartesian
 
 
-def test_policy(policy, env, goal, renderer=None):
+def test_policy(policy, env, goal):
     env.reset()
     env.set_goal(goal)
     env.arm.reset()  # force arm to be in vertical configuration
@@ -12,8 +12,6 @@ def test_policy(policy, env, goal, renderer=None):
     while True:
         action, _states = policy.predict(obs, deterministic=True)
         obs, rewards, done, info = env.step(action)
-        if renderer is not None:
-            renderer.plot([(env.arm, "tab:blue")])
         if done:
             break
     state = env.arm.get_state()
@@ -27,32 +25,32 @@ def test_policy(policy, env, goal, renderer=None):
         return 0
 
 
-def score_policy(policy, env, renderer):
+def score_policy(policy, env):
     print("\n--- Computing score ---")
     score = 0
 
     goal = polar2cartesian(1.8, 0.2 - np.pi / 2.0)
-    _score = test_policy(policy, env, goal, renderer)
+    _score = test_policy(policy, env, goal)
     score += _score
     print(f"\nGoal 1: {_score}")
 
     goal = polar2cartesian(1.9, -0.15 - np.pi / 2.0)
-    _score = test_policy(policy, env, goal, renderer)
+    _score = test_policy(policy, env, goal)
     score += _score
     print(f"\nGoal 2: {_score}")
 
     goal = polar2cartesian(1.6, 0.25 - np.pi / 2.0)
-    _score = test_policy(policy, env, goal, renderer)
+    _score = test_policy(policy, env, goal)
     score += _score
     print(f"\nGoal 3: {_score}")
 
     goal = polar2cartesian(1.8, -0.25 - np.pi / 2.0)
-    _score = test_policy(policy, env, goal, renderer)
+    _score = test_policy(policy, env, goal)
     score += _score
     print(f"\nGoal 4: {_score}")
 
     goal = polar2cartesian(1.6, 0.45 - np.pi / 2.0)
-    _score = test_policy(policy, env, goal, renderer)
+    _score = test_policy(policy, env, goal)
     score += _score
     print(f"\nGoal 5: {_score}")
 
@@ -61,7 +59,7 @@ def score_policy(policy, env, renderer):
     print('---')
     return score
 
-def run_episode(q_network, env, device, gui, goal=None):
+def run_episode(q_network, env, device, goal=None):
 
     obs = env.reset(goal)
     done = False
@@ -69,8 +67,6 @@ def run_episode(q_network, env, device, gui, goal=None):
     while not done:
         action = q_network.select_discrete_action(obs, device)
         obs, reward, done, _ = env.step(q_network.action_discrete_to_continuous(action))
-        if gui:
-            time.sleep(env.timestep)
         episode_reward += reward
     return episode_reward
 
@@ -81,8 +77,8 @@ def random_episodes(q_network, env, device, args):
         print(f'\nepisode: {episode}, reward: {episode_reward}')
 
 
-def test_episode(q_network, env, device, goal, easy_target, hard_target, gui=False):
-    episode_reward = run_episode(q_network, env, device, gui, goal)
+def test_episode(q_network, env, device, goal, easy_target, hard_target):
+    episode_reward = run_episode(q_network, env, device, goal)
     print(f'reward: {episode_reward}')
     print(f'easy target: {easy_target}')
     print(f'hard target: {hard_target}')
@@ -92,29 +88,29 @@ def test_episode(q_network, env, device, goal, easy_target, hard_target, gui=Fal
     print(f'points: {points}')
     return points
         
-def compute_score(q_network, env, device, gui=False):
+def compute_score(q_network, env, device):
     print("---Computing score---")
     score = 0
     
     print("\nGoal 1:")
     goal = polar2cartesian(1.8, 0.2 - np.pi/2.0)
-    score += test_episode(q_network, env, device, goal, -7, -5, gui)
+    score += test_episode(q_network, env, device, goal, -7, -5)
     
     print("\nGoal 2:")
     goal = polar2cartesian(1.9, -0.15 - np.pi/2.0)
-    score += test_episode(q_network, env, device, goal, -7, -5, gui)
+    score += test_episode(q_network, env, device, goal, -7, -5)
 
     print("\nGoal 3:")
     goal = polar2cartesian(1.6, 0.25 - np.pi/2.0)
-    score += test_episode(q_network, env, device, goal, -10, -7, gui)
+    score += test_episode(q_network, env, device, goal, -10, -7)
 
     print("\nGoal 4:")
     goal = polar2cartesian(1.8, -0.25 - np.pi/2.0)
-    score += test_episode(q_network, env, device, goal, -10, -7, gui)
+    score += test_episode(q_network, env, device, goal, -10, -7)
 
     print("\nGoal 5:")
     goal = polar2cartesian(1.6, 0.40 - np.pi/2.0)
-    score += test_episode(q_network, env, device, goal, -20, -15, gui)
+    score += test_episode(q_network, env, device, goal, -20, -15)
 
     print(f'\n\nFinal score: {score}')
     return score
