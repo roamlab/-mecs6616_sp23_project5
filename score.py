@@ -79,7 +79,7 @@ def random_episodes(q_network, env, device, args):
 
 def test_episode(q_network, env, device, goal, easy_target, hard_target):
     episode_reward = run_episode(q_network, env, device, goal)
-    print(f'reward: {episode_reward}')
+    print(f'Total reward: {episode_reward}')
     print(f'easy target: {easy_target}')
     print(f'hard target: {hard_target}')
     points = 0
