@@ -83,8 +83,8 @@ def test_episode(q_network, env, device, goal, easy_target, hard_target):
     print(f'easy target: {easy_target}')
     print(f'hard target: {hard_target}')
     points = 0
-    if (episode_reward > easy_target): points += 2
-    if (episode_reward > hard_target): points += 1
+    if (episode_reward > easy_target): points += 1
+    if (episode_reward > hard_target): points += 0.5
     print(f'points: {points}')
     return points
         
@@ -93,24 +93,24 @@ def compute_score(q_network, env, device):
     score = 0
     
     print("\nGoal 1:")
-    goal = polar2cartesian(1.8, 0.2 - np.pi/2.0)
+    goal = polar2cartesian(1.9, -0.25 - np.pi/2.0)
     score += test_episode(q_network, env, device, goal, -7, -5)
     
     print("\nGoal 2:")
-    goal = polar2cartesian(1.9, -0.15 - np.pi/2.0)
+    goal = polar2cartesian(1.6, 0.25 - np.pi/2.0)
     score += test_episode(q_network, env, device, goal, -7, -5)
 
     print("\nGoal 3:")
-    goal = polar2cartesian(1.6, 0.25 - np.pi/2.0)
-    score += test_episode(q_network, env, device, goal, -10, -7)
+    goal = polar2cartesian(1.8, 0.3 - np.pi/2.0)
+    score += test_episode(q_network, env, device, goal, -7, -5)
 
     print("\nGoal 4:")
-    goal = polar2cartesian(1.8, -0.25 - np.pi/2.0)
-    score += test_episode(q_network, env, device, goal, -10, -7)
+    goal = polar2cartesian(1.5, 0.3 - np.pi/2.0)
+    score += test_episode(q_network, env, device, goal, -7, -5)
 
     print("\nGoal 5:")
     goal = polar2cartesian(1.6, 0.40 - np.pi/2.0)
-    score += test_episode(q_network, env, device, goal, -20, -15)
+    score += test_episode(q_network, env, device, goal, -10, -7)
 
     print(f'\n\nFinal score: {score}')
     return score
