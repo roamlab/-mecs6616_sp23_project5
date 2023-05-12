@@ -76,8 +76,8 @@ class ArmEnv(gym.Env):
         radius_min = 1.5
         angle_max = 0.5
         angle_min = -0.5
-        radius = (radius_max - radius_min) * self.np_random.random_sample() + radius_min
-        angle = (angle_max - angle_min) * self.np_random.random_sample() + angle_min
+        radius = (radius_max - radius_min) * self.np_random.random() + radius_min
+        angle = (angle_max - angle_min) * self.np_random.random() + angle_min
         angle -= np.pi / 2
         setgoal = polar2cartesian(radius, angle) if goal is None else np.array(goal)
         self.set_goal(setgoal)
